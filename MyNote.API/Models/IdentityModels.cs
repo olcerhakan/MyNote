@@ -28,6 +28,8 @@ namespace MyNote.API.Models
         public ApplicationDbContext()
             : base("DefaultConnection", throwIfV1Schema: false)
         {
+            Configuration.ProxyCreationEnabled = false;
+            //Configuration.LazyLoadingEnabled = false;
         }
         
         public static ApplicationDbContext Create()
