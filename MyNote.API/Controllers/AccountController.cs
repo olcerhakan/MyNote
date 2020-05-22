@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
@@ -28,6 +29,7 @@ namespace MyNote.API.Controllers
 
         public AccountController()
         {
+            Thread.Sleep(1200);
         }
 
         public AccountController(ApplicationUserManager userManager,
