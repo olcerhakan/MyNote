@@ -13,26 +13,60 @@ function checkLogin() {
         showLoginPage();
         return;
     }
-    //token ı geçerli mi?
-    $.ajax({
-        url: apiUrl + "api/Account/UserInfo",
-        type: "GET",
-        headers: { Authorization: "Bearer " + loginData.access_token },
-        success: function (data) {
+    // is token valid ?
+    ajax("api/Account/UserInfo", "GET",
+        function (data) {
             showAppPage();
         },
-        error: function (data) {
+        function () {
             showLoginPage();
-        }
+        });
 
-    });
+
+    //$.ajax({
+    //    url: apiUrl + "api/Account/UserInfo",
+    //    type: "GET",
+    //    headers: getAuthHeader(),
+    //    success: function (data) {
+    //        showAppPage();
+    //    },
+    //    error: function () {
+    //        showLoginPage();
+    //    }
+    //});
 
 }
 function showAppPage() {
     $(".only-logged-out").hide();
     $(".only-logged-in").show();
     $(".page").hide();
-    $("#page-app").show();
+
+    // retrieve the notes (notları getir)
+    ajax("api/Notes/List", "GET",
+        function (data) {
+            console.log(data);
+
+            $("#notes").html("");
+            for (var i = 0; i < data.length; i++) {
+                //her birinin içine ekle
+                //var a= document.createElement("a");   jQuery version
+                
+                var a = $("<a />")      //elementi oluştur
+                    .attr("href", "#")
+                    .addClass("list-group-item list-group-item-action show-note")     //class ekle
+                    .text(data[i].Title)                                    //metnini ekle
+                    .prop("note", data[i]);                                 //oluştur
+                $("#notes").append(a);
+               
+            }
+
+            //show page when it's ready
+            $("#page-app").show();
+        },
+        function () {
+
+        });
+  
 }
 
 function showLoginPage() {
@@ -40,6 +74,20 @@ function showLoginPage() {
     $(".only-logged-out").show();
     $(".page").hide();
     $("#page-login").show();
+}
+
+function getAuthHeader() {
+    return { Authorization: "Bearer " + getLoginData().access_token };
+}
+
+function ajax(url, type, successFunc, errorFunc) {
+    $.ajax({
+        url: apiUrl + url,
+        type: type,
+        headers: getAuthHeader(),
+        success: successFunc,
+        error: errorFunc
+    });
 }
 
 function getLoginData() {
@@ -186,6 +234,12 @@ $("#btnLogout").click(function (event) {
     showLoginPage();
 })
 
+$("body").on("click", ".show-note", function (event) {
+    event.preventDefault();
+    var note = this.note;
+    $("#title").val(note.Title);
+    $("#content").val(note.Content);
+});
 
 //ACTIONS
 checkLogin();
