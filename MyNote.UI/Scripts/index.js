@@ -1,6 +1,8 @@
 ﻿//GLOBAL VARIABLES
 var apiUrl = "https://localhost:44371/";
 
+var selectedNote = null;
+var selectedLink = null;
 
 //functions
 function checkLogin() {         
@@ -14,7 +16,7 @@ function checkLogin() {
         return;
     }
     // is token valid ?
-    ajax("api/Account/UserInfo", "GET",
+    ajax("api/Account/UserInfo", "GET",null,
         function (data) {
             showAppPage();
         },
@@ -42,7 +44,7 @@ function showAppPage() {
     $(".page").hide();
 
     // retrieve the notes (notları getir)
-    ajax("api/Notes/List", "GET",
+    ajax("api/Notes/List", "GET",null,
         function (data) {
             console.log(data);
 
@@ -80,14 +82,28 @@ function getAuthHeader() {
     return { Authorization: "Bearer " + getLoginData().access_token };
 }
 
-function ajax(url, type, successFunc, errorFunc) {
+function ajax(url, type,data, successFunc, errorFunc) {
     $.ajax({
         url: apiUrl + url,
         type: type,
+        data:data,
         headers: getAuthHeader(),
         success: successFunc,
         error: errorFunc
     });
+}
+
+function updateNote() {
+    ajax("api/Notes/Update/" + selectedNote.Id, "PUT",
+        { Id: selectedNote.Id, Title: $("#title").val(), Content: $("#content").val() },
+        function (data) {
+            selectedLink.note = data;
+            selectedLink.text = data.Title;
+        },
+        function () {
+
+        }
+    );
 }
 
 function getLoginData() {
@@ -236,10 +252,27 @@ $("#btnLogout").click(function (event) {
 
 $("body").on("click", ".show-note", function (event) {
     event.preventDefault();
-    var note = this.note;
-    $("#title").val(note.Title);
-    $("#content").val(note.Content);
+    selectedNote = this.note;
+    selectedLink = this;
+
+    $("#title").val(selectedNote.Title);
+    $("#content").val(selectedNote.Content);
+
+    $(".show-note").removeClass("active");
+    $(this).addClass("active");
 });
+
+$("#frmNote").submit(function (event) {
+    event.preventDefault();
+
+    //routing
+    if (selectedNote) {
+        updateNote();
+    } 
+    else {
+        addNote();  //ajax isteği gönderen metot
+    }
+})
 
 //ACTIONS
 checkLogin();
