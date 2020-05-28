@@ -1,0 +1,3 @@
+﻿sayfa ilk açıldığında giriş yapmış mı bak ona göre (login,app) göster
+
+login olduktan sonra login gizle app göster
