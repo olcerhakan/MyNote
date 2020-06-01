@@ -29,7 +29,9 @@ namespace MyNote.API.Controllers
 
         public AccountController()
         {
-            Thread.Sleep(1200);
+#if DEBUG
+            Thread.Sleep(200);
+#endif
         }
 
         public AccountController(ApplicationUserManager userManager,
