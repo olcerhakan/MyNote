@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyNote.API", "MyNote.API\My
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyNote.UI", "MyNote.UI\MyNote.UI.csproj", "{5C78C620-C9FA-4E46-9E0B-6B8E86713D0E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyNote.Desktop", "MyNote.Desktop\MyNote.Desktop.csproj", "{E1C193B3-46A8-4F08-AA4E-A21F9B353024}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{5C78C620-C9FA-4E46-9E0B-6B8E86713D0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C78C620-C9FA-4E46-9E0B-6B8E86713D0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5C78C620-C9FA-4E46-9E0B-6B8E86713D0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1C193B3-46A8-4F08-AA4E-A21F9B353024}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1C193B3-46A8-4F08-AA4E-A21F9B353024}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1C193B3-46A8-4F08-AA4E-A21F9B353024}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1C193B3-46A8-4F08-AA4E-A21F9B353024}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
