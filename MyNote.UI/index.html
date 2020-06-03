@@ -1,9 +1,11 @@
 ﻿<!DOCTYPE html>
-<html class="h-100" ng-app="myApp" ng-controller="myCtrl">
+<html class="h-100" ng-app="myApp" ng-controller="mainController">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <title>My Notes</title>
+
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
     <link href="Content/bootstrap.min.css" rel="stylesheet" />
     <link href="Content/fontawesome-all.min.css" rel="stylesheet" />
     <link href="Content/styles.css" rel="stylesheet" />
@@ -16,8 +18,8 @@
     <script src="Scripts/index.js"></script>
 </head>
 <body class="h-100">
-    
-    <div class="loading d-none">
+
+    <div class="loading " ng-show="isLoading">
         <div class="spinner-border" role="status">
             <span class="sr-only">Loading...</span>
         </div>
@@ -37,14 +39,14 @@
                     </li>
 
                 </ul>
-                                    <!-- kritik  . bunun içinde yer alan bi a ya tıklandığında index.js de  -->
+                <!-- kritik  . bunun içinde yer alan bi a ya tıklandığında index.js de  -->
                 <ul class="navbar-nav navbar-login only-logged-out">
                     <li class="nav-item">
-                                                <!-- kritik --> 
+                        <!-- kritik -->
                         <a class="nav-link" href="#pills-signin">Log In</a>
                     </li>
                     <li class="nav-item">
-                                                   <!-- kritik -->
+                        <!-- kritik -->
                         <a class="nav-link" href="#pills-signup">Register</a>
                     </li>
                 </ul>
@@ -58,7 +60,9 @@
         </nav>
     </header>
 
-   <div ng-view class="h-100"></div>
+    <!--index html: {{ test }}
+    <hr />-->
+    <div ng-view class="h-100"></div>
 
 
 
