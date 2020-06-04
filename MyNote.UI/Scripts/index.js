@@ -14,9 +14,45 @@ app.config(function ($routeProvider) {
     $routeProvider
         .when("/", { templateUrl: "pages/app.html", controller: "appController" })
         .when("/login", { templateUrl: "pages/login.html", controller: "loginController" });
-});
+})
+    .run(function ($rootScope, $location) {
+        $rootScope.loginData = function () {
+            var loginDataJson = localStorage["login"] || sessionStorage["login"];
 
-app.controller("mainController", function ($scope, $http) {
+            if (!loginDataJson) {
+                return null;
+            }
+
+            try {
+                return JSON.parse(loginDataJson);
+            } catch (e) {
+                return null;
+            }
+        };
+
+        $rootScope.isLoggedIn = function () {
+            if ($rootScope.loginData()) {
+                return true;
+            }
+            return false;
+        }
+
+        // https://stackoverflow.com/questions/11541695/redirecting-to-a-certain-route-based-on-condition/11542936#11542936
+        // register listener to watch route changes
+        $rootScope.$on("$routeChangeStart", function (event, next, current) {
+            if ($rootScope.loginData() == null) {
+                //giriş yapmış kullanıcı yoksa
+                // no logged user, we should be going to #login
+                if (next.templateUrl != "pages/login.html") {       //yönlenmek üzere olunan sayfa login değilse
+                    // not going to #login, we should redirect now
+                    $location.path("/login");
+                }
+            }
+        });
+    });
+
+
+app.controller("mainController", function ($scope, $http, $location) {
     $scope.isLoading = false;
     $scope.showLoading = function () {
         $scope.isLoading = true;
@@ -25,19 +61,7 @@ app.controller("mainController", function ($scope, $http) {
         $scope.isLoading = false;
     };
 
-    $scope.loginData = function () {
-        var loginDataJson = localStorage["login"] | sessionStorage["login"];
 
-        if (!loginDataJson) {
-            return null;
-        }
-
-        try {
-            return JSON.parse(loginDataJson);
-        } catch (e) {
-            return null;
-        }
-    };
 
     $scope.token = function () {
         var loginData = $scope.loginData();
@@ -47,6 +71,13 @@ app.controller("mainController", function ($scope, $http) {
 
         return loginData.access_token;
     }
+
+    $scope.logout = function () {
+        //token ları temizle, redirecte çekeriz
+        localStorage.removeItem("login");
+        sessionStorage.removeItem("login");
+        $location.path("/login");
+    };
 
 
     $scope.ajax = function (apiUri, method, data, isAuth, successFunc, errorFunc) {
@@ -74,19 +105,21 @@ app.controller("mainController", function ($scope, $http) {
         );
     };
 
-
+    //if there is a token, this methods check , if it is still valid
     $scope.checkAuth = function () {
-        var tokenJson = localStorage["token"] | sessionStorage["token"];
-
-        if (!tokenJson) {
-            //  display login/register view
-            console.log("giriş yapılmamıştır..");
-            return;
+        if ($scope.loginData()) {
+            $scope.ajax("api/Account/UserInfo", "get", null, true,
+                function (response) {
+                    if (response.data.Email != $scope.loginData().userName) {
+                        $scope.logout();
+                    }
+                },
+                function (response) {
+                    if (response.status == 401) {
+                        $scope.logout();
+                    }
+                });
         }
-
-        // check if token is valid
-
-        //  display app view
     };
 
     $scope.checkAuth();
@@ -94,7 +127,7 @@ app.controller("mainController", function ($scope, $http) {
 
 });   //html den sorumlu ana controller
 
-app.controller("loginController", function ($scope, $http) {
+app.controller("loginController", function ($scope, $timeout, $location, $httpParamSerializer) {
 
     $scope.currentTab = "login";  //  login |  register
     $scope.messageFor = "login";  // login | register
@@ -127,6 +160,9 @@ app.controller("loginController", function ($scope, $http) {
                     $scope.messages.push(data.ModelState[prop][index]);
                 }
             }
+        }
+        if (data.error_description) {
+            $scope.messages.push(data.error_description);
         }
 
 
@@ -174,13 +210,35 @@ app.controller("loginController", function ($scope, $http) {
     };
 
     $scope.loginSubmit = function () {
-        alert("login submit");
+        $scope.ajax("Token", "post", $httpParamSerializer($scope.loginForm), false,
+            function (response) {
+                //eski loginleri temizle
+                localStorage.removeItem("login");
+                sessionStorage.removeItem("login");
+                var storage = $scope.rememberMe ? localStorage : sessionStorage;
+                storage["login"] = JSON.stringify(response.data);
+                //bunun üstünde yapcaz yoksa remember me yi kaybederiz
+
+                $scope.resetLoginForm();
+
+                $scope.success("Your login is successful. Redirecting...");
+                $timeout(function () {
+                    $location.path("/");
+                }, 1000);
+
+            },
+            function (response) {
+                console.log(response);
+                $scope.error(response.data);
+            }
+        );
     };
 });     // view /login
 
-
 app.controller("appController", function ($scope, $location) {
-    $location.path("/login"); //sonra sil
+    //if (!$scope.loginData()) 
+    //     $location.path("/login"); //sonra sil
+
 
 });     //view  /app
 
