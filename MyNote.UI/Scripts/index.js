@@ -16,6 +16,17 @@ app.config(function ($routeProvider) {
         .when("/login", { templateUrl: "pages/login.html", controller: "loginController" });
 })
     .run(function ($rootScope, $location) {
+
+        //https://stackoverflow.com/questions/26340181/angularjs-copy-common-properties-from-one-object-to-another/26341011#26341011
+        $rootScope.update = function (srcObj, destObj) {
+            for (var key in destObj) {
+                if (destObj.hasOwnProperty(key) && srcObj.hasOwnProperty(key)) {
+                    destObj[key] = srcObj[key];
+                }
+            }
+        }
+
+
         $rootScope.loginData = function () {
             var loginDataJson = localStorage["login"] || sessionStorage["login"];
 
@@ -35,7 +46,7 @@ app.config(function ($routeProvider) {
                 return true;
             }
             return false;
-        }
+        };
 
         // https://stackoverflow.com/questions/11541695/redirecting-to-a-certain-route-based-on-condition/11542936#11542936
         // register listener to watch route changes
@@ -236,9 +247,118 @@ app.controller("loginController", function ($scope, $timeout, $location, $httpPa
 });     // view /login
 
 app.controller("appController", function ($scope, $location) {
-    //if (!$scope.loginData()) 
-    //     $location.path("/login"); //sonra sil
+    $scope.notes = [];
+    $scope.currentNote = null;
+    $scope.noteForm = {
+        Id: null,
+        Title: "",
+        Content: "",
+        CreationTime: "",
+        ModificationTime: ""
+    };
 
+    $scope.getNotes = function () {
+        $scope.ajax("api/Notes/List", "get", null, true,
+            function (response) {
+                $scope.notes = response.data;
+            },
+            function (response) {
+
+            }
+        );
+    };
+
+    $scope.showNote = function (event, note) {
+        if (event) {
+            event.preventDefault();
+
+        }
+        $scope.currentNote = note;
+        $scope.noteForm = angular.copy(note);
+    };
+
+    $scope.putNote = function () {
+        var data = {
+            Id: $scope.noteForm.Id,
+            Title: $scope.noteForm.Title,
+            Content: $scope.noteForm.Content,
+
+        };
+        $scope.ajax("api/Notes/Update/" + data.Id, "put", data, true,
+            function (response) {
+                //run da
+                $scope.update(response.data, $scope.currentNote);
+            },
+            function (response) {
+
+            }
+        );
+    };
+
+    $scope.postNote = function () {
+        var data = {
+
+            Title: $scope.noteForm.Title,
+            Content: $scope.noteForm.Content,
+
+        };
+        $scope.ajax("api/Notes/New", "post", data, true,
+            function (response) {
+                //run da
+                $scope.notes.push(response.data);
+                $scope.showNote(null, response.data);
+            },
+            function (response) {
+
+            }
+        );
+    };
+
+    $scope.submitNote = function () {
+        //current not varsa put note yapıcaz , yoksa post note yapıcaz
+        if ($scope.currentNote) {
+            $scope.putNote();
+        } else {
+            $scope.postNote();
+        }
+    };
+
+    $scope.newNote = function () {
+        $scope.currentNote = null;
+        $scope.noteForm = {
+            Id: null,
+            Title: "",
+            Content: "",
+            CreationTime: "",
+            ModificationTime: "",
+        };
+        document.getElementById("title").focus();
+    };
+
+    $scope.deleteNote = function () {
+        if ($scope.currentNote) {
+            $scope.ajax("api/Notes/Delete/" + $scope.currentNote.Id, "delete", null, true,
+                function (response) {
+                    
+                    for (var i = 0; i < $scope.notes.length; i++) {
+                        if ($scope.notes[i] == $scope.currentNote) {
+                            //js array remove element
+                            $scope.notes.splice(i, 1);
+                            //currentNote gitti artık 
+                            //$scope.currentNote = null;
+                            $scope.newNote();
+                            return;
+                        }
+                    }
+                },
+                function (response) {
+
+                }
+            );
+        }
+
+    };
+    $scope.getNotes();
 
 });     //view  /app
 
